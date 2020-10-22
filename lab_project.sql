@@ -173,7 +173,6 @@ order by cust.companyname, custadd.addresstype;
 
 -- Challenge 2: Filter Customer Addresses
 
-
 -- retrieve customers with only main office addressess
 select cust.companyname
 from [SalesLT].[Customer] as cust 
@@ -197,6 +196,29 @@ where customerid in (
                         intersect
                         select custadd.customerid
                         from [SalesLT].[CustomerAddress] as custadd 
-                        where addresstype = 'Shipping')
-                    
+                        where addresstype = 'Shipping');
+
+-- Lab 5: Retrieve Product Information
+
+-- Challenge 1: Retrieve Product Information
+
+-- Retrieve the name and approx weight of each product
+select concat(productid,' ',upper(name)), round(weight, 0) as ApproxWeight from [SalesLT].[Product];
+
+-- Retrieve the year & month in which products were first sold
+select concat(productid,' ',upper(name)), round(weight, 0) as ApproxWeight, year(sellstartdate) as SellStartYear, datename(month,sellstartdate) as SellStartMonth from [SalesLT].[Product];
+
+-- Extract product types from product numbers
+select concat(productid,' ',upper(name)) ProductDetails, left(productnumber, 2) ProductType, round(weight, 0) as ApproxWeight, year(sellstartdate) as SellStartYear, datename(month,sellstartdate) as SellStartMonth from [SalesLT].[Product];
+
+-- Retrieve only products with a numeric size
+select size, concat(productid,' ',upper(name)) ProductDetails, left(productnumber, 2) ProductType, round(weight, 0) as ApproxWeight, year(sellstartdate) as SellStartYear, datename(month,sellstartdate) as SellStartMonth 
+from [SalesLT].[Product]
+where isnumeric(size) = 1;
+
+
+
+
+
+
 
