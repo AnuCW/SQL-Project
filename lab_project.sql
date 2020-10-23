@@ -306,6 +306,40 @@ dbo.ufnGetCustomerInformation(ca.customerid) as ci;
 -- Challenge 1: Retrieve Product Information
 
 -- Retrieve product model descriptions
+select p.productId, p.name, pmcd.name, pmcd.summary
+from [SalesLT].[Product] as p 
+join [SalesLT].[vProductModelCatalogDescription] as pmcd 
+on pmcd.productmodelid = p.productmodelid;
+
+-- Create a table of distinct colors
+Declare @colors table(color varchar(20));
+Insert into @colors
+select distinct color 
+from [SalesLT].[Product]; 
+select productid, name, color 
+from [SalesLT].[Product]
+where color IN
+(select * from @colors);
+
+-- Retrieve product parent categories
+select p.productid, p.name, gac.productcategoryname, gac.parentproductcategoryname
+from [SalesLT].[Product] as p 
+join dbo.ufnGetAllCategories() as gac 
+on gac.productcategoryid = p.productcategoryid;
+
+-- Challenge 2: Retrieve Customer Sales Revenue
+
+-- Retrieve sales revenue by customer and contact
+With CompanySummary (contactname, TotalRevenue)
+AS  
+(select concat(c.firstname,' ', c.lastname) AS ContactName, soh.totalDue TotalRevenue
+from [SalesLT].[Customer] as c 
+join [SalesLT].[SalesOrderHeader] as soh 
+on soh.customerid = c.customerid)
+select ContactName, sum(TotalRevenue) as TotalRevenue
+from Companysummary
+group by ContactName
+order by TotalRevenue DESC;
 
 
 
