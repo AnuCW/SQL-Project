@@ -216,6 +216,44 @@ select size, concat(productid,' ',upper(name)) ProductDetails, left(productnumbe
 from [SalesLT].[Product]
 where isnumeric(size) = 1;
 
+-- Challenge 2 : Rank customers by Revenue
+
+-- Retrieve companies ranked by sales totals
+select CustomerID,
+rank() over(order by totalDue Desc) Rank
+from [SalesLT].[SalesOrderHeader];
+
+-- Challenge 3 : Aggregate Product SaLes
+
+-- Retrieve total sales by product
+select P.name, sum(SOD.linetotal) As TotalRevenue 
+from [SalesLT].[Product] P 
+Join [SalesLT].[SalesOrderDetail] SOD 
+ON P.productID = SOD.productID
+Group by name
+order by TotalRevenue Desc;
+
+-- Filter the product sales list to include only products that cost over $1,000
+
+select P.name, sum(SOD.linetotal) As TotalRevenue 
+from [SalesLT].[Product] P 
+Join [SalesLT].[SalesOrderDetail] SOD 
+ON P.productID = SOD.productID
+WHERE p.listprice> 1000
+Group by name
+order by TotalRevenue Desc;
+
+-- Filter the product sales groups to include only total sales over $20,000
+select P.name, sum(SOD.linetotal) As TotalRevenue 
+from [SalesLT].[Product] P 
+Join [SalesLT].[SalesOrderDetail] SOD 
+ON P.productID = SOD.productID
+Group by name
+having sum(SOD.linetotal)>20000
+order by TotalRevenue Desc;
+
+
+
 
 
 
