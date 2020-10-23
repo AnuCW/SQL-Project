@@ -341,6 +341,22 @@ from Companysummary
 group by ContactName
 order by TotalRevenue DESC;
 
+-- Lab 8 – Grouping Sets and Pivoting Data
+
+-- Challenge 1: Retrieve Regional Sales Totals
+
+-- Retrieve totals for country/region and state/province
+SELECT a.CountryRegion, a.StateProvince, SUM(soh.TotalDue) AS Revenue
+FROM SalesLT.Address AS a
+JOIN SalesLT.CustomerAddress AS ca ON a.AddressID = ca.AddressID
+JOIN SalesLT.Customer AS c ON ca.CustomerID = c.CustomerID
+JOIN SalesLT.SalesOrderHeader as soh ON c.CustomerID = soh.CustomerID
+GROUP BY rollup(a.CountryRegion, a.StateProvince)
+ORDER BY a.CountryRegion, a.StateProvince;
+
+-- Indicate the grouping level in the results
+
+
 
 
 
