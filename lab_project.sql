@@ -252,6 +252,61 @@ Group by name
 having sum(SOD.linetotal)>20000
 order by TotalRevenue Desc;
 
+-- Lab 6 : Using Subqueries and APPLY
+
+-- Challenge 1: Retrieve Product Price Information
+
+-- Retrieve products whose list price is higher than the average unit price
+select productid, name, listprice 
+from [SalesLT].[Product]
+where listprice>
+(select avg(unitprice) from [SalesLT].[SalesOrderDetail]);
+
+-- Retrieve Products with a list price of $100 or more that have been sold for less than $100
+select productid, name, listprice
+from [SalesLT].[Product]
+where listprice >=100 
+And productid IN
+(select productid from [SalesLT].[SalesOrderDetail] 
+where unitprice<100);
+
+-- Retrieve the cost, list price, and average selling price for each product
+select p.productid, p.name, p.standardcost, p.listprice, 
+(select avg(sod.unitprice) from [SalesLT].[SalesOrderDetail] sod
+where sod.productid = p.productid) AverageUnitPrice 
+from [SalesLT].[Product] p;
+
+-- Retrieve products that have an average selling price that is lower than the cost
+select p.productid, p.name, p.standardcost, p.listprice, 
+(select avg(sod.unitprice) from [SalesLT].[SalesOrderDetail] sod
+where sod.productid = p.productid) AverageUnitPrice 
+from [SalesLT].[Product] p
+where p.standardcost > 
+(select avg(sod.unitprice) from [SalesLT].[SalesOrderDetail] sod 
+where p.productid=sod.productid);
+
+-- Challenge 2: Retrieve Customer Information
+
+-- Retrieve customer information for all sales orders
+select soh.salesorderid, ci.customerid, ci.firstname, ci.lastname, soh.totaldue
+from [SalesLT].[SalesOrderHeader] soh 
+cross apply 
+dbo.ufnGetCustomerInformation(soh.customerid) as ci;
+
+-- Retrieve customer address information
+select ci.customerid, ci.firstname, ci.lastname, a.addressline1, a.city 
+from [SalesLT].[CustomerAddress] as ca 
+join [SalesLT].[Address] as a 
+ON a.addressid = ca.addressid
+cross apply 
+dbo.ufnGetCustomerInformation(ca.customerid) as ci;
+
+-- Lab 7 : Using Table Expressions
+
+-- Challenge 1: Retrieve Product Information
+
+-- Retrieve product model descriptions
+
 
 
 
