@@ -355,13 +355,49 @@ GROUP BY rollup(a.CountryRegion, a.StateProvince)
 ORDER BY a.CountryRegion, a.StateProvince;
 
 -- Indicate the grouping level in the results
+SELECT a.CountryRegion, a.StateProvince, SUM(soh.TotalDue) AS Revenue,
+CASE 
+	WHEN GROUPING_ID(a.CountryRegion) = 1 AND GROUPING_ID(a.StateProvince) = 1 THEN 'Total'
+	WHEN GROUPING_ID(a.CountryRegion) = 0 AND GROUPING_ID(a.StateProvince) = 1 THEN CONCAT(a.CountryRegion, ' Subtotal')
+	WHEN GROUPING_ID(a.CountryRegion) = 0 AND GROUPING_ID(a.StateProvince) = 0 THEN CONCAT(a.StateProvince, ' Subtotal')
+END AS Level
+FROM SalesLT.Address AS a
+JOIN SalesLT.CustomerAddress AS ca ON a.AddressID = ca.AddressID
+JOIN SalesLT.Customer AS c ON ca.CustomerID = c.CustomerID
+JOIN SalesLT.SalesOrderHeader as soh ON c.CustomerID = soh.CustomerID
+GROUP BY rollup(a.CountryRegion, a.StateProvince)
+ORDER BY a.CountryRegion, a.StateProvince;
 
+-- Add a grouping level for cities
+SELECT a.CountryRegion, a.StateProvince, a.city, SUM(soh.TotalDue) AS Revenue,
+CASE 
+	WHEN GROUPING_ID(a.CountryRegion) = 1 AND GROUPING_ID(a.StateProvince) = 1 AND GROUPING_ID(a.city) = 1 THEN 'Total'
+	WHEN GROUPING_ID(a.CountryRegion) = 0 AND GROUPING_ID(a.StateProvince) = 1 AND GROUPING_ID(a.city) = 1 THEN CONCAT(a.CountryRegion, ' Subtotal')
+	WHEN GROUPING_ID(a.CountryRegion) = 0 AND GROUPING_ID(a.StateProvince) = 0 AND GROUPING_ID(a.city) = 1 THEN CONCAT(a.StateProvince, ' Subtotal')
+    WHEN GROUPING_ID(a.CountryRegion) = 0 AND GROUPING_ID(a.StateProvince) = 0 AND GROUPING_ID(a.city) = 0 THEN CONCAT(a.city, ' Subtotal')
+END AS Level
+FROM SalesLT.Address AS a
+JOIN SalesLT.CustomerAddress AS ca ON a.AddressID = ca.AddressID
+JOIN SalesLT.Customer AS c ON ca.CustomerID = c.CustomerID
+JOIN SalesLT.SalesOrderHeader as soh ON c.CustomerID = soh.CustomerID
+GROUP BY rollup(a.CountryRegion, a.StateProvince, a.city)
+ORDER BY a.CountryRegion, a.StateProvince, a.city;
 
+-- Challenge 2: Retrieve Customer Sales Revenue by Category
 
-
-
-
-
-
-
+-- Retrieve customer sales revenue for each parent category
+select * from 
+(
+    select c.companyname, vgac.parentproductcategoryname, sod.linetotal as TotalRevenue
+    from [SalesLT].[Customer] as c 
+    join [SalesLT].[SalesOrderHeader] as soh on soh.customerid = c.customerid
+    join [SalesLT].[SalesOrderDetail] as sod on sod.salesorderid = soh.salesorderid
+    join [SalesLT].[Product] as p on p.productid=sod.productid
+    join [SalesLT].[vGetAllCategories] as vgac on vgac.productcategoryid = p.productcategoryid
+) as cn 
+Pivot 
+(
+    sum(TotalRevenue) 
+        FOR [ParentProductCategoryName] IN ([Accessories], [Bikes], [Clothing], [Components])
+)as pcn;
 
